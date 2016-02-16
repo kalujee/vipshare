@@ -18,14 +18,12 @@
     "jade": "~1.11.0",
     "jsdom": "^6.2.0",
     "moment": "2.10.6",
-    "mongoose": "~4.0.0",
-    "mongoose-auto-increment": "4.0.0",
-    "mongoose-merge-plugin": "0.0.5",
     "morgan": "~1.6.1",
     "node-schedule": "^0.2.9",
     "promise": "7.0.4",
     "request": "^2.64.0",
     "serve-favicon": "~2.3.0",
-    "underscore": "1.8.3"
+    "underscore": "1.8.3",
+    "bmob": "1.0.0"
   }
 }

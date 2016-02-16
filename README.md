@@ -12,4 +12,9 @@ thunder vip and iQiyi vip share server side.
 2. baas使用bmob
 3. 服务器使用系统的定时任务从指定网站上面爬取账号
 
+### to be continued
+1. 爱奇艺账号的获取
+2. iOS app的发布
+
+
 
