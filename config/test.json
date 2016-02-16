@@ -1,0 +1,43 @@
+{
+    "jwtTokenSecret" : "zhangshangshicaitest",
+    "mongodb" :  "mongodb://localhost/store_test",
+    "accesslog" : "log/access_test.log",
+    "port" : 3200,
+	"redis" : "tcp://localhost:6379",
+	"redisNS" : "store_test",
+	"autoIndex" : true,
+	"imageSize" : 160,
+	"orderEndHour"	: 25,
+	"orderStartHour"	: 0,
+	"warning4pricenochangedays"	: 3,
+	"warning4noorderstoredays" : 3,
+	"imagedest" : "/var/www/html/ts/pics",
+	"datadest" : "/var/www/html/ts/data",
+	"nodecount" : 2,
+    "appID":"wx869bb83c55a38ff9",
+    "appsecret":"caf3dc30bde96f86941b858e2cff4a3f",
+    "Token":"5c7c6d691897de8065e81d1db7fda4f4",
+	"pwarn":{
+		"100": 2,
+		"200": 7,
+		"300": 3,
+		"400": 5,
+		"500": 5,
+		"600": 3,
+		"700": 7,
+		"800": 7,
+		"900": 5
+	},
+    "menu":{
+        "button": [
+        {
+            "type": "view",
+            "name": "我要下单",
+            "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx869bb83c55a38ff9&redirect_uri=http%3A%2F%2Fmt.zhangchuwang.cn%2Fapi%2Fwx%2Fcallback%3Faction%3Dmain&response_type=code&scope=snsapi_base&state=1#wechat_redirect"
+        }, {
+            "type": "view",
+            "name": "我的订单",
+            "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx869bb83c55a38ff9&redirect_uri=http%3A%2F%2Fmt.zhangchuwang.cn%2Fapi%2Fwx%2Fcallback%3Faction%3Dmyorder&response_type=code&scope=snsapi_base&state=1#wechat_redirect"
+        }]
+    }
+}

@@ -1,0 +1,5 @@
+{
+    "jwtTokenSecret" : "zhangshangshicai",
+    "mongodb" :  "mongodb://localhost/infobord_dev",
+    "accesslog" : "log/access.log"
+}
