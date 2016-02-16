@@ -124,6 +124,27 @@ var getThunder = function() {
                         },
                         error: function(model, error) {
                             console.log("create object fail", error);
+                            if (error.code == 401) {
+                                // 已经存在，就更新
+                                var query = new Bmob.Query(ThunderStore);
+                                query.equalTo("username", username); 
+                                // 查询所有数据
+                                query.find({
+                                    success: function(results) {
+                                        console.log("共查询到 " + results.length + " 条记录");
+                                        // 循环处理查询到的数据
+                                        for (var i = 0; i < results.length; i++) {
+                                            var object = results[i];
+                                            console.log(object.id + ' - ' + object.get('username'));
+                                            object.set("password", pwd);
+                                            object.save();
+                                        }
+                                    },
+                                    error: function(error) {
+                                        console.log("查询失败: " + error.code + " " + error.message);
+                                    }
+                                });
+                            }
                         }
                     });
                 }
@@ -152,7 +173,9 @@ var start = function() {
     getThunder();
 }
 
-start();
+module.exports = {
+    start: start
+};
 
 
 
