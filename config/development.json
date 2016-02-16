@@ -1,8 +1,0 @@
-{
-    "apn_addr": "gateway.sandbox.push.apple.com",
-    "cert": "certificate/PushChatCert.pem",
-    "key": "certificate/PushChatKey.pem",
-    "ca": "certificate/ck.pem",
-    "accesslog" : "log/access_dev.log",
-    "port" : 3100
-}
