@@ -23,6 +23,7 @@ Bmob.initialize("71013e2a98aef3eb77632ddadd073d56", "dd4ecc8f3c980c6c3de32c2dc5a
 //添加一行数据
 var ThunderStore = Bmob.Object.extend("thunder");
 var IQiyiStore = Bmob.Object.extend("iqiyi");
+var execcount_Store = Bmob.Object.extend("exec_count");
 
 String.prototype.Trim = function()    
 {    
@@ -245,16 +246,41 @@ var getIQiyi = function() {
     req.end();
 }
 
+//
+// 统计执行crontab的次数、
+// 
+var addExecCount = function(name) {
+    var query = new Bmob.Query(execcount_Store);
+    query.equalTo("name", name);
+    query.find({
+       success: function(results){
+            if (results.length > 0) {
+                var obj = results[0];
+                var count = obj.get('count');
+                obj.set('count', parseInt(count) + 1);
+                obj.save();
+            }
+       },
+       error: function(err){
+          
+       }
+    });
+}
+
 var startIqiyi = function() {
     console.log('start iqiyi');
     count_iqiyi = 0;
     getIQiyi();
+
+    addExecCount("iqiyi");
+    
 }
 
 var startThunder = function() {
     console.log('start thunder');
     count_thunder = 0;
     getThunder();
+    addExecCount('thunder');
 }
 
 var scheduled = null;
