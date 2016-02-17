@@ -3,19 +3,18 @@ var jsdom = require("jsdom");
 var async = require("async");
 var http = require("http");
 var iconv = require('iconv-lite');
-// var JobModel = require('./models').job;
-// var HospitalModel = require('./models').hospital;
-// var PreferenceModel = require('./models').preference;
-// var config = require('config');
-// var apn = require('apn');
-// var schedule = require('node-schedule');
-// var utils = require('./utils');
+var schedule = require('node-schedule');
 var moment = require('moment');
 var cheerio = require('cheerio');
 var request = require('request');
 
 var thunderStartindex = process.env.Thunder;
-var iQiqiStartindex = process.env.IQiqi;
+var iQiqiStartindex = process.env.IQiyi;
+
+var thunderIndex = thunderStartindex;
+var iQiyiIndex = iQiqiStartindex;
+var count_thunder = 0;
+var count_iqiyi = 0;
 
 var Bmob = require("bmob").Bmob;
 //初始化，第一个参数是Application_id，第二个参数是REST API Key
@@ -32,11 +31,11 @@ String.prototype.Trim = function()
 
 var getThunder = function() {
 
-    console.log('page is----', thunderStartindex);
+    console.log('page is----', thunderIndex);
 
     var option = {
         hostname: "www.xunleihuiyuan.net",
-        path: "/vip/" + thunderStartindex  + ".html"
+        path: "/vip/" + thunderIndex  + ".html"
     };
 
     var data_string = "";
@@ -51,9 +50,16 @@ var getThunder = function() {
         });
         
         res.on('end', function(data) {
-            
-            // console.log(data_string);
 
+            if (res.statusCode == 404) {
+                console.log('404 not found');
+                return;
+            }
+
+            count_thunder ++;
+            thunderIndex = parseInt(thunderStartindex) + count_thunder;
+            getThunder();
+            // 
             $ = cheerio.load(data_string);
 
             $("div.post-body.formattext").children().each(function(i, element) {
@@ -110,17 +116,154 @@ var getThunder = function() {
 }
 
 var getIQiyi = function() {
-    // login('kalujee', '123456', function (cookie) {
-    //     // console.log('cookie is ', cookie);
-    //     getHospitalDetail(cookie)
-    // });
+    
+    console.log('page is----', iQiyiIndex);
+
+    var option = {
+        hostname: "www.yudi8.com",
+        path: "/vip/" + iQiyiIndex  + ".html"
+    };
+
+    console.log(option);
+    var data_string = "";
+    var allexist = false;
+    var req = http.request(option, function(res) {
+
+        var values = [];
+        res.on("data", function(chunk) {
+            var count = 0;
+            var string = iconv.decode(chunk, "gb2312");
+            data_string = data_string + string;
+        });
+        
+        res.on('end', function(data) {
+
+            if (res.statusCode == 404) {
+                console.log('404 not found');
+                return;
+            }
+
+            if (count_iqiyi > 300) {
+
+                return;
+            }
+            count_iqiyi ++;
+            iQiyiIndex = parseInt(iQiqiStartindex) + count_iqiyi;
+            getIQiyi();
+
+            $ = cheerio.load(data_string);
+
+            $("section.content").children().each(function(i, element) {
+                // var text = $(this).text().Trim();
+                if (this.next) {
+                    var data = this.next.data;
+                    if (data && data.length > 10) {
+                        var re_email = /[\w-]{1,}@\w{1,}\.\w{1,}/;
+                        var re_phone = /1\d{10}/;
+                        var re_qq = /\d{6,}/;
+                        var re_pwd = /\w{5,}/;
+
+                        var exec_email = re_email.exec(data);
+                        var username = null;
+                        var pwd = null;
+                        var index = -1;
+
+                        if (exec_email) {
+                            
+                            username = exec_email[0];
+                            index = exec_email.index;
+                        } else {
+                            var exec_phone = re_phone.exec(data);
+                            if (exec_phone) {
+                                username = exec_phone[0];
+                                index = exec_phone.index;
+                            } else {
+                                var exec_qq = re_qq.exec(data);
+                                if (exec_qq) {
+                                    username = exec_qq[0];
+                                    index = exec_qq.index;
+                                }
+                            }
+                        }
+
+                        if (username) {
+                            var sub_str = data.substring(index + username.length);
+                            var result_p = re_pwd.exec(sub_str);
+                            if (result_p) {
+                                pwd = result_p[0];
+                            }
+                        }
+
+                        console.log(username, pwd);
+                        if (username && pwd) {
+                            var store = new IQiyiStore();
+                            store.set("username", username);
+                            store.set("password", pwd);
+                            store.set("liked", Math.ceil(Math.random() * 300 + 100));
+                            store.set("unliked", Math.ceil(Math.random() * 20 + 5));
+
+                            store.save(null, {
+                                success: function(object) {
+                                    console.log("create object success, object id:" + object.id);
+                                },
+                                error: function(model, error) {
+                                    console.log("create object fail", error);
+                                    if (error.code == 401) {
+                                        // 已经存在，就删除更新
+                                        var query = new Bmob.Query(IQiyiStore);
+                                        query.equalTo("username", username); 
+                                        // 查询所有数据并删除
+                                        query.destroyAll({
+                                           success: function(){
+                                              //删除成功
+                                              store.save();
+                                           },
+                                           error: function(err){
+                                              // 删除失败
+                                           }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+
+                    }
+                }
+                
+            });
+        });
+
+        // res.on('error', function(err) {
+        //     console.log(err);
+        // });
+    }).on("error", function(e) {
+
+        console.log('error is', e.message);
+        
+    });
+
+    req.end();
+}
+
+var startIqiyi = function() {
+    console.log('start iqiyi');
+    count_iqiyi = 0;
+    getIQiyi();
+}
+
+var startThunder = function() {
+    console.log('start thunder');
+    count_thunder = 0;
+    getThunder();
 }
 
 var scheduled = null;
-
 var start = function() {
+    console.log('scheduled');
 
-    getThunder();
+    var scheduled = schedule.scheduleJob('0 8 * * * *', startIqiyi);
+    // var scheduled2 = schedule.scheduleJob('* * */8 * * *', startThunder);
+
 }
 
 module.exports = {
