@@ -57,71 +57,48 @@ var getThunder = function() {
             $ = cheerio.load(data_string);
 
             $("div.post-body.formattext").children().each(function(i, element) {
-                // console.log($(this).text());
                 var text = $(this).text().Trim();
+                var re_u = new RegExp("\\w{1,}\:\\d");
+                var result = re_u.exec(text);
+                if (result) {
+                    var re_p = new RegExp("\\d+");
+                    var username = result[0];
+                    var sub_str = text.substring(result.index + username.length);
+                    var result_p = re_p.exec(sub_str);
+                    if (result_p) {
+                        var pwd = result_p[0];
 
-                var user_start = text.indexOf('账号');
-                var user_start2 = text.indexOf('分享');
-                user_start = user_start > user_start2 ? user_start : user_start2;
-                var pwd_start1 = text.indexOf('密码');
-                var pwd_start2 = text.indexOf('密');
-                // console.log(text, user_start, pwd_start1, pwd_start2);
+                        var store = new ThunderStore();
+                        store.set("username", username);
+                        store.set("password", pwd);
+                        store.set("liked", Math.ceil(Math.random() * 300 + 100));
+                        store.set("unliked", Math.ceil(Math.random() * 100 + 10));
 
-                if (user_start > 0 && (pwd_start1 > 0 || pwd_start2 > 0)) {
-                    var username = text.substring(user_start + 2, pwd_start1 < 0 ? pwd_start2 : pwd_start1);
-                    var pwd = '';
-                    if (pwd_start1 > 0) {
-                        pwd = text.substring(pwd_start2 + 2, text.length);
-                    } else if (pwd_start2 > 0) {
-                        pwd = text.substring(pwd_start2 + 1, text.length);
-                    }
-
-                    var store = new ThunderStore();
-                    store.set("username", username);
-                    store.set("password", pwd);
-                    store.set("liked", Math.ceil(Math.random() * 300 + 100));
-                    store.set("unliked", Math.ceil(Math.random() * 100 + 10));
-
-                    store.save(null, {
-                        success: function(object) {
-                            // console.log("create object success, object id:" + object.id);
-                        },
-                        error: function(model, error) {
-                            console.log("create object fail", error);
-                            if (error.code == 401) {
-                                // 已经存在，就删除更新
-                                var query = new Bmob.Query(ThunderStore);
-                                query.equalTo("username", username); 
-                                // 查询所有数据并删除
-                                query.destroyAll({
-                                   success: function(){
-                                      //删除成功
-                                      store.save();
-                                   },
-                                   error: function(err){
-                                      // 删除失败
-                                   }
-                                });
-                                // query.find({
-                                //     success: function(results) {
-                                //         console.log("共查询到 " + results.length + " 条记录");
-                                //         // 循环处理查询到的数据
-                                //         for (var i = 0; i < results.length; i++) {
-                                //             var object = results[i];
-                                //             console.log(object.id + ' - ' + object.get('username'));
-                                //             object.set("password", pwd);
-                                //             object.save();
-                                //         }
-                                //     },
-                                //     error: function(error) {
-                                //         console.log("查询失败: " + error.code + " " + error.message);
-                                //     }
-                                // });
+                        store.save(null, {
+                            success: function(object) {
+                                console.log("create object success, object id:" + object.id);
+                            },
+                            error: function(model, error) {
+                                console.log("create object fail", error);
+                                if (error.code == 401) {
+                                    // 已经存在，就删除更新
+                                    var query = new Bmob.Query(ThunderStore);
+                                    query.equalTo("username", username); 
+                                    // 查询所有数据并删除
+                                    query.destroyAll({
+                                       success: function(){
+                                          //删除成功
+                                          store.save();
+                                       },
+                                       error: function(err){
+                                          // 删除失败
+                                       }
+                                    });
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-
             });
         });
     }).on("error", function(e) {
