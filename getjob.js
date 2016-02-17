@@ -17,7 +17,6 @@ var request = require('request');
 var thunderStartindex = process.env.Thunder;
 var iQiqiStartindex = process.env.IQiqi;
 
-
 var Bmob = require("bmob").Bmob;
 //初始化，第一个参数是Application_id，第二个参数是REST API Key
 Bmob.initialize("71013e2a98aef3eb77632ddadd073d56", "dd4ecc8f3c980c6c3de32c2dc5a1a46b");
@@ -29,45 +28,6 @@ var IQiyiStore = Bmob.Object.extend("iqiyi");
 String.prototype.Trim = function()    
 {    
     return this.replace(/(^\s*)|(\s*$)/g, "");    
-}    
-
-var insertJob = function(name, url, hospital, date, cb) {
-
-    JobModel.isExist(name, hospital, function(err, exist) {
-        if (exist == false) {
-            JobModel.insertNew({name: name, 
-                                url: url, 
-                                hospital: hospital, 
-                                releaseData: moment(date, "YYYY-MM-DD").toDate()},
-                                function(err, job) {
-                                    if (err) {
-                                        cb(err);
-                                    } else if (!job) {
-                                        cb('fail to create job');
-                                    } else {
-
-                                        //判断是否是需要推送给其它的
-                                        //同时需要避免推送风暴
-                                        //增加一个待推送的列表
-                                        //如果已经在列表中，就不推送了
-                                        //
-                                        checkShouldPush(name);
-                                        cb(null);
-                                    }
-                                }
-                                );
-        } else if(err && exist == null) {
-            // checkShouldPush(name);
-            cb(err);
-        } else {
-            // update
-            // checkShouldPush(name);
-            JobModel.update({name: name, hospital: hospital}, 
-                            {$set: {releaseData: moment(date, "YYYY-MM-DD").toDate()}}, function(err, newone) {
-                                cb(err);
-                            });
-        }
-    });
 }
 
 var getThunder = function() {
@@ -101,6 +61,8 @@ var getThunder = function() {
                 var text = $(this).text().Trim();
 
                 var user_start = text.indexOf('账号');
+                var user_start2 = text.indexOf('分享');
+                user_start = user_start > user_start2 ? user_start : user_start2;
                 var pwd_start1 = text.indexOf('密码');
                 var pwd_start2 = text.indexOf('密');
                 // console.log(text, user_start, pwd_start1, pwd_start2);
@@ -117,33 +79,44 @@ var getThunder = function() {
                     var store = new ThunderStore();
                     store.set("username", username);
                     store.set("password", pwd);
+                    store.set("liked", Math.ceil(Math.random() * 300 + 100));
+                    store.set("unliked", Math.ceil(Math.random() * 100 + 10));
 
                     store.save(null, {
                         success: function(object) {
-                            console.log("create object success, object id:" + object.id);
+                            // console.log("create object success, object id:" + object.id);
                         },
                         error: function(model, error) {
                             console.log("create object fail", error);
                             if (error.code == 401) {
-                                // 已经存在，就更新
+                                // 已经存在，就删除更新
                                 var query = new Bmob.Query(ThunderStore);
                                 query.equalTo("username", username); 
-                                // 查询所有数据
-                                query.find({
-                                    success: function(results) {
-                                        console.log("共查询到 " + results.length + " 条记录");
-                                        // 循环处理查询到的数据
-                                        for (var i = 0; i < results.length; i++) {
-                                            var object = results[i];
-                                            console.log(object.id + ' - ' + object.get('username'));
-                                            object.set("password", pwd);
-                                            object.save();
-                                        }
-                                    },
-                                    error: function(error) {
-                                        console.log("查询失败: " + error.code + " " + error.message);
-                                    }
+                                // 查询所有数据并删除
+                                query.destroyAll({
+                                   success: function(){
+                                      //删除成功
+                                      store.save();
+                                   },
+                                   error: function(err){
+                                      // 删除失败
+                                   }
                                 });
+                                // query.find({
+                                //     success: function(results) {
+                                //         console.log("共查询到 " + results.length + " 条记录");
+                                //         // 循环处理查询到的数据
+                                //         for (var i = 0; i < results.length; i++) {
+                                //             var object = results[i];
+                                //             console.log(object.id + ' - ' + object.get('username'));
+                                //             object.set("password", pwd);
+                                //             object.save();
+                                //         }
+                                //     },
+                                //     error: function(error) {
+                                //         console.log("查询失败: " + error.code + " " + error.message);
+                                //     }
+                                // });
                             }
                         }
                     });
