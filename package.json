@@ -6,7 +6,6 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "apn": "^1.7.5",
     "async": "^1.4.2",
     "bmob": "1.0.0",
     "body-parser": "~1.13.2",
