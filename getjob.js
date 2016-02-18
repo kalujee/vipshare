@@ -92,14 +92,32 @@ var getThunder = function() {
                                     var query = new Bmob.Query(ThunderStore);
                                     query.equalTo("username", username); 
                                     // 查询所有数据并删除
-                                    query.destroyAll({
-                                       success: function(){
-                                          //删除成功
-                                          store.save();
-                                       },
-                                       error: function(err){
-                                          // 删除失败
-                                       }
+                                    query.find({
+                                        success: function(results) {
+
+                                            if (results.length > 0) {
+                                                var object = results[0];
+                                                var liked = object.get("liked");
+                                                var unliked = object.get("unliked");
+
+                                                // 查询所有数据并删除
+                                                query.destroyAll({
+                                                   success: function(){
+                                                      //删除成功
+                                                        store.set("liked", liked);
+                                                        store.set("unliked", unliked);
+                                                        store.save();
+                                                   },
+                                                   error: function(err){
+                                                      // 删除失败
+                                                   }
+                                                });
+                                            }
+
+                                        },
+                                        error: function(error) {
+
+                                        }
                                     });
                                 }
                             }
@@ -213,16 +231,32 @@ var getIQiyi = function() {
                                         // 已经存在，就删除更新
                                         var query = new Bmob.Query(IQiyiStore);
                                         query.equalTo("username", username); 
-                                        // 查询所有数据并删除
-                                        query.destroyAll({
-                                           success: function(){
-                                              //删除成功
-                                              store.save();
-                                           },
-                                           error: function(err){
-                                              // 删除失败
-                                           }
+                                        query.find({
+                                            success: function(results) {
+
+                                                if (results.length > 0) {
+                                                    var object = results[0];
+                                                    var liked = object.get("liked");
+                                                    var unliked = object.get("unliked");
+
+                                                    // 查询所有数据并删除
+                                                    query.destroyAll({
+                                                       success: function(){
+                                                          //删除成功
+                                                            store.set("liked", liked);
+                                                            store.set("unliked", unliked);
+                                                            store.save();
+                                                       },
+                                                       error: function(err){
+                                                          // 删除失败
+                                                       }
+                                                    });
+                                                }
+                                            },
+                                            error: function(error) {
+                                            }
                                         });
+                                        
                                     }
                                 }
                             });
@@ -287,8 +321,8 @@ var crontab = require('node-crontab');
 
 var start = function() {
     console.log('scheduled');
-
-    var scheduled = crontab.scheduleJob('5 * * * *', startIqiyi);
+    startIqiyi();
+    var scheduled = crontab.scheduleJob('27 * * * *', startIqiyi);
     var scheduled2 = crontab.scheduleJob('5 0,8,14,22 * * *', startThunder);
 
 }
