@@ -321,7 +321,6 @@ var crontab = require('node-crontab');
 
 var start = function() {
     console.log('scheduled');
-    startIqiyi();
     var scheduled = crontab.scheduleJob('27 * * * *', startIqiyi);
     var scheduled2 = crontab.scheduleJob('5 0,8,14,22 * * *', startThunder);
 
