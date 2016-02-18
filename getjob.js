@@ -283,14 +283,14 @@ var startThunder = function() {
     addExecCount('thunder');
 }
 
-var scheduled = null;
+var crontab = require('node-crontab');
+
 var start = function() {
     console.log('scheduled');
 
-    var scheduled = schedule.scheduleJob('5 * * * *', startIqiyi);
-    var scheduled2 = schedule.scheduleJob('* 0,8,14,22 * * *', startThunder);
+    var scheduled = crontab.scheduleJob('5 * * * *', startIqiyi);
+    var scheduled2 = crontab.scheduleJob('5 0,8,14,22 * * *', startThunder);
 
-    console.log(scheduled, scheduled2);
 }
 
 module.exports = {
