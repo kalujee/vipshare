@@ -78,8 +78,8 @@ var getThunder = function() {
                         var store = new ThunderStore();
                         store.set("username", username);
                         store.set("password", pwd);
-                        store.set("liked", Math.ceil(Math.random() * 300 + 100));
-                        store.set("unliked", Math.ceil(Math.random() * 100 + 10));
+                        store.set("liked", 1);
+                        store.set("unliked", 0);
 
                         store.save(null, {
                             success: function(object) {
@@ -200,8 +200,8 @@ var getIQiyi = function() {
                             var store = new IQiyiStore();
                             store.set("username", username);
                             store.set("password", pwd);
-                            store.set("liked", Math.ceil(Math.random() * 300 + 100));
-                            store.set("unliked", Math.ceil(Math.random() * 20 + 5));
+                            store.set("liked", 1);
+                            store.set("unliked", 0);
 
                             store.save(null, {
                                 success: function(object) {
