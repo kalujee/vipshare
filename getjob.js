@@ -8,8 +8,9 @@ var moment = require('moment');
 var cheerio = require('cheerio');
 var request = require('request');
 
-var thunderStartindex = process.env.Thunder;
-var iQiqiStartindex = process.env.IQiyi;
+var thunderStartindex = 960;//process.env.Thunder;
+var iQiqiStartindex = 5330;//process.env.IQiyi;
+var year = 2016;
 
 var thunderIndex = thunderStartindex;
 var iQiyiIndex = iQiqiStartindex;
@@ -52,6 +53,8 @@ var getThunder = function() {
         
         res.on('end', function(data) {
 
+            var date_count = 0;
+
             if (res.statusCode == 404) {
                 console.log('404 not found');
                 return;
@@ -62,6 +65,26 @@ var getThunder = function() {
             getThunder();
             // 
             $ = cheerio.load(data_string);
+
+            var title = $(".post-title").text();
+            if (title) {
+                var reg1 = /\d{1,2}月\d{1,2}\w+/;
+                var result_1 = reg1.exec(title);
+                if (result_1) {
+                    var d = result_1[0].split('月');
+
+                    date_count = year * 400 + parseInt(d[0]) * 80 + parseInt(d[1]);
+
+                    var substr2 = title.substring(result_1.index + result_1[0].length);
+                    var reg2 = /\d/
+                    var result_2 = reg2.exec(substr2);
+                    if (result_2) {
+                        date_count += parseInt(result_2[0]);
+                    }
+                }
+                
+            }
+
 
             $("div.post-body.formattext").children().each(function(i, element) {
                 var text = $(this).text().Trim();
@@ -80,6 +103,7 @@ var getThunder = function() {
                         store.set("password", pwd);
                         store.set("liked", 1);
                         store.set("unliked", 0);
+                        store.set("datacount", date_count);
 
                         store.save(null, {
                             success: function(object) {
@@ -143,7 +167,7 @@ var getIQiyi = function() {
         path: "/vip/" + iQiyiIndex  + ".html"
     };
 
-    console.log(option);
+    // console.log(option);
     var data_string = "";
     var allexist = false;
     var req = http.request(option, function(res) {
@@ -157,6 +181,7 @@ var getIQiyi = function() {
         
         res.on('end', function(data) {
 
+            var date_count = 0;
             if (res.statusCode == 404) {
                 console.log('404 not found');
                 return;
@@ -171,6 +196,27 @@ var getIQiyi = function() {
             getIQiyi();
 
             $ = cheerio.load(data_string);
+            var title = $("title").text();
+            if (title) {
+                console.log(title);
+                var reg1 = /\d{1,2}月\d{1,2}\w+/;
+                var result_1 = reg1.exec(title);
+                if (result_1) {
+                    var d = result_1[0].split('月');
+                    console.log(d);
+                    date_count = year * 400 + parseInt(d[0]) * 80 + parseInt(d[1]);
+
+                    var substr2 = title.substring(result_1.index + result_1[0].length);
+                    var reg2 = /\d{1,2}/
+                    var result_2 = reg2.exec(substr2);
+
+                    if (result_2) {
+                        // console.log(parseInt(result_2));
+                        date_count += parseInt(result_2[0]);
+                    }
+                }
+                
+            }
 
             $("section.content").children().each(function(i, element) {
                 // var text = $(this).text().Trim();
@@ -220,6 +266,7 @@ var getIQiyi = function() {
                             store.set("password", pwd);
                             store.set("liked", 1);
                             store.set("unliked", 0);
+                            store.set("datacount", date_count);
 
                             store.save(null, {
                                 success: function(object) {
@@ -261,7 +308,6 @@ var getIQiyi = function() {
                                 }
                             });
                         }
-
                     }
                 }
                 
@@ -321,8 +367,9 @@ var crontab = require('node-crontab');
 
 var start = function() {
     console.log('scheduled');
-    var scheduled = crontab.scheduleJob('27 * * * *', startIqiyi);
-    var scheduled2 = crontab.scheduleJob('5 0,8,14,22 * * *', startThunder);
+    var scheduled = crontab.scheduleJob('51 * * * *', startIqiyi);
+    var scheduled2 = crontab.scheduleJob('54 0,8,14,22 * * *', startThunder);
+    // getIQiyi();
 
 }
 
