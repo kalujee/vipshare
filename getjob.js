@@ -204,7 +204,7 @@ var getIQiyi = function() {
                 if (result_1) {
                     var d = result_1[0].split('月');
                     console.log(d);
-                    date_count = year * 400 + parseInt(d[0]) * 80 + parseInt(d[1]);
+                    date_count = year * 30000 + parseInt(d[0]) * 2000 + parseInt(d[1]) * 50;
 
                     var substr2 = title.substring(result_1.index + result_1[0].length);
                     var reg2 = /\d{1,2}/
@@ -367,8 +367,8 @@ var crontab = require('node-crontab');
 
 var start = function() {
     console.log('scheduled');
-    var scheduled = crontab.scheduleJob('51 * * * *', startIqiyi);
-    var scheduled2 = crontab.scheduleJob('54 0,8,14,22 * * *', startThunder);
+    var scheduled = crontab.scheduleJob('15 * * * *', startIqiyi);
+    var scheduled2 = crontab.scheduleJob('10 0,8,14,22 * * *', startThunder);
     // getIQiyi();
 
 }
