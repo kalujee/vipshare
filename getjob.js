@@ -112,37 +112,37 @@ var getThunder = function() {
                             error: function(model, error) {
                                 console.log("create object fail", error);
                                 if (error.code == 401) {
-                                    // 已经存在，就删除更新
-                                    var query = new Bmob.Query(ThunderStore);
-                                    query.equalTo("username", username); 
-                                    // 查询所有数据并删除
-                                    query.find({
-                                        success: function(results) {
+                                    // 已经存在，就不删除更新
+                                    // var query = new Bmob.Query(ThunderStore);
+                                    // query.equalTo("username", username); 
+                                    // // 查询所有数据并删除
+                                    // query.find({
+                                    //     success: function(results) {
 
-                                            if (results.length > 0) {
-                                                var object = results[0];
-                                                var liked = object.get("liked");
-                                                var unliked = object.get("unliked");
+                                    //         if (results.length > 0) {
+                                    //             var object = results[0];
+                                    //             var liked = object.get("liked");
+                                    //             var unliked = object.get("unliked");
 
-                                                // 查询所有数据并删除
-                                                query.destroyAll({
-                                                   success: function(){
-                                                      //删除成功
-                                                        store.set("liked", liked);
-                                                        store.set("unliked", unliked);
-                                                        store.save();
-                                                   },
-                                                   error: function(err){
-                                                      // 删除失败
-                                                   }
-                                                });
-                                            }
+                                    //             // 查询所有数据并删除
+                                    //             query.destroyAll({
+                                    //                success: function(){
+                                    //                   //删除成功
+                                    //                     store.set("liked", liked);
+                                    //                     store.set("unliked", unliked);
+                                    //                     store.save();
+                                    //                },
+                                    //                error: function(err){
+                                    //                   // 删除失败
+                                    //                }
+                                    //             });
+                                    //         }
 
-                                        },
-                                        error: function(error) {
+                                    //     },
+                                    //     error: function(error) {
 
-                                        }
-                                    });
+                                    //     }
+                                    // });
                                 }
                             }
                         });
@@ -275,34 +275,34 @@ var getIQiyi = function() {
                                 error: function(model, error) {
                                     console.log("create object fail", error);
                                     if (error.code == 401) {
-                                        // 已经存在，就删除更新
-                                        var query = new Bmob.Query(IQiyiStore);
-                                        query.equalTo("username", username); 
-                                        query.find({
-                                            success: function(results) {
+                                        // 已经存在，就不删除更新
+                                        // var query = new Bmob.Query(IQiyiStore);
+                                        // query.equalTo("username", username); 
+                                        // query.find({
+                                        //     success: function(results) {
 
-                                                if (results.length > 0) {
-                                                    var object = results[0];
-                                                    var liked = object.get("liked");
-                                                    var unliked = object.get("unliked");
+                                        //         if (results.length > 0) {
+                                        //             var object = results[0];
+                                        //             var liked = object.get("liked");
+                                        //             var unliked = object.get("unliked");
 
-                                                    // 查询所有数据并删除
-                                                    query.destroyAll({
-                                                       success: function(){
-                                                          //删除成功
-                                                            store.set("liked", liked);
-                                                            store.set("unliked", unliked);
-                                                            store.save();
-                                                       },
-                                                       error: function(err){
-                                                          // 删除失败
-                                                       }
-                                                    });
-                                                }
-                                            },
-                                            error: function(error) {
-                                            }
-                                        });
+                                        //             // 查询所有数据并删除
+                                        //             query.destroyAll({
+                                        //                success: function(){
+                                        //                   //删除成功
+                                        //                     store.set("liked", liked);
+                                        //                     store.set("unliked", unliked);
+                                        //                     store.save();
+                                        //                },
+                                        //                error: function(err){
+                                        //                   // 删除失败
+                                        //                }
+                                        //             });
+                                        //         }
+                                        //     },
+                                        //     error: function(error) {
+                                        //     }
+                                        // });
                                         
                                     }
                                 }
