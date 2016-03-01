@@ -9,7 +9,7 @@ var cheerio = require('cheerio');
 var request = require('request');
 
 var thunderStartindex = 960;//process.env.Thunder;
-var iQiqiStartindex = 5330;//process.env.IQiyi;
+var iQiqiStartindex = 5620;//process.env.IQiyi;
 var year = 2016;
 
 var thunderIndex = thunderStartindex;
@@ -68,7 +68,7 @@ var getThunder = function() {
 
             var title = $(".post-title").text();
             if (title) {
-                var reg1 = /\d{1,2}月\d{1,2}\w+/;
+                var reg1 = /\d{1,2}月\d{1,2}/;
                 var result_1 = reg1.exec(title);
                 if (result_1) {
                     var d = result_1[0].split('月');
@@ -199,11 +199,13 @@ var getIQiyi = function() {
             var title = $("title").text();
             if (title) {
                 console.log(title);
-                var reg1 = /\d{1,2}月\d{1,2}\w+/;
+                var reg1 = /\d{1,2}月\d{1,2}/;
+                
                 var result_1 = reg1.exec(title);
+                // console.log('reg execute ', result_1);
                 if (result_1) {
                     var d = result_1[0].split('月');
-                    console.log(d);
+                    // console.log(d);
                     date_count = year * 30000 + parseInt(d[0]) * 2000 + parseInt(d[1]) * 50;
 
                     var substr2 = title.substring(result_1.index + result_1[0].length);
