@@ -9,12 +9,15 @@ var cheerio = require('cheerio');
 var request = require('request');
 
 var thunderStartindex = 960;//process.env.Thunder;
+var thunder2Startindex = 9481;
 var iQiqiStartindex = 5620;//process.env.IQiyi;
 var year = 2016;
 
 var thunderIndex = thunderStartindex;
+var thunder2Index = thunder2Startindex;
 var iQiyiIndex = iQiqiStartindex;
 var count_thunder = 0;
+var count_thunder2 = 0;
 var count_iqiyi = 0;
 
 var Bmob = require("bmob").Bmob;
@@ -29,6 +32,118 @@ var execcount_Store = Bmob.Object.extend("exec_count");
 String.prototype.Trim = function()    
 {    
     return this.replace(/(^\s*)|(\s*$)/g, "");    
+}
+
+var getThunder2 = function() {
+    console.log('page is----', thunder2Index);
+
+    var option = {
+        hostname: "521xunlei.com",
+        path: "/thread-" + thunder2Index  + "-1-1.html"
+    };
+
+    var data_string = "";
+    var allexist = false;
+    var req = http.request(option, function(res) {
+
+        var values = [];
+        res.on("data", function(chunk) {
+            var count = 0;
+            var string = iconv.decode(chunk, "gbk");
+            data_string = data_string + string;
+        });
+        
+        res.on('end', function(data) {
+
+            var date_count = 0;
+
+            if (res.statusCode == 404) {
+                console.log('404 not found');
+                return;
+            }
+
+            // 
+            $ = cheerio.load(data_string);
+
+            var alert = $("div.alert_error#messagetext");
+            if (alert.length > 0) {
+                console.log('url is not good');
+                return;
+            }
+
+            count_thunder2 ++;
+            thunder2Index = parseInt(thunder2Startindex) + count_thunder2;
+            getThunder2();
+
+            var title = $("title").text();
+            if (title) {
+                var reg1 = /\d{1,2}[.月]\d{1,2}/;
+                var result_1 = reg1.exec(title);
+                if (result_1) {
+                    var d = [];
+                    if (result_1[0].indexOf('月') > 0) {
+                        d = result_1[0].split('月');
+                    } else {
+                        d = result_1[0].split('.');
+                    }
+
+                    console.log(result_1);
+                    date_count = year * 400 + parseInt(d[0]) * 80 + parseInt(d[1]);
+
+                    var substr2 = title.substring(result_1.index + result_1[0].length);
+                    var reg2 = /[一二提前]{1,2}/
+                    var result_2 = reg2.exec(substr2);
+                    if (result_2) {
+                        if (result_2[0].indexOf('一') >= 0 || result_2[0].indexOf('提') >=0 || result_2[0].indexOf('前') >=0) {
+                            date_count += 1;
+                        } else {
+                            date_count += 2;
+                        }
+                        console.log(result_2);
+                    }
+                }
+            }
+            $('font[size="4"]').each(function(i, element) {
+                var text = $(this).text().Trim();
+                var re_u = new RegExp("\\w{1,}\:\\d");
+                var result = re_u.exec(text);
+                if (result) {
+                    var re_p = new RegExp("\\d+");
+                    var username = result[0];
+                    var sub_str = text.substring(result.index + username.length);
+                    var result_p = re_p.exec(sub_str);
+                    if (result_p) {
+                        var pwd = result_p[0];
+
+                        var store = new ThunderStore();
+                        store.set("username", username);
+                        store.set("password", pwd);
+                        store.set("liked", 1);
+                        store.set("unliked", 0);
+                        store.set("datacount", date_count);
+                        store.set("source", '521xunlei');
+
+                        store.save(null, {
+                            success: function(object) {
+                                console.log("create object success, object id:" + object.id);
+                            },
+                            error: function(model, error) {
+                                console.log("create object fail", error);
+                                if (error.code == 401) {
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    }, 5000).on("error", function(e) {
+        console.log('error is', e.message);
+        // cb(e);
+    });
+
+    req.end();
+
 }
 
 var getThunder = function() {
@@ -104,6 +219,7 @@ var getThunder = function() {
                         store.set("liked", 1);
                         store.set("unliked", 0);
                         store.set("datacount", date_count);
+                        store.set("source", '老冰棍');
 
                         store.save(null, {
                             success: function(object) {
@@ -358,6 +474,13 @@ var startIqiyi = function() {
     
 }
 
+var startThunder2 = function() {
+    console.log('start thunder2');
+    count_thunder2 = 0;
+    getThunder2();
+    addExecCount("thunder");
+}
+
 var startThunder = function() {
     console.log('start thunder');
     count_thunder = 0;
@@ -371,8 +494,8 @@ var start = function() {
     console.log('scheduled');
     var scheduled = crontab.scheduleJob('15 * * * *', startIqiyi);
     var scheduled2 = crontab.scheduleJob('10 0,8,14,22 * * *', startThunder);
+    var scheduled3 = crontab.scheduleJob('50 10,11,12,22,23 * * *', startThunder2);
     // getIQiyi();
-
 }
 
 module.exports = {
