@@ -10,7 +10,7 @@ var request = require('request');
 
 var thunderStartindex = 960;//process.env.Thunder;
 var thunder2Startindex = 9481;
-var iQiqiStartindex = 5620;//process.env.IQiyi;
+var iQiqiStartindex = 6000;//process.env.IQiyi;
 var year = 2016;
 
 var thunderIndex = thunderStartindex;
@@ -303,10 +303,10 @@ var getIQiyi = function() {
                 return;
             }
 
-            if (count_iqiyi > 300) {
+            // if (count_iqiyi > 300) {
+            //     return;
+            // }
 
-                return;
-            }
             count_iqiyi ++;
             iQiyiIndex = parseInt(iQiqiStartindex) + count_iqiyi;
             getIQiyi();
